@@ -47,6 +47,10 @@ def get_profile_info(profile):
     for common_domain in common_domains:
         if common_domain in domains:
             domains.remove(common_domain)
+    
+    ## Deal with deepmind-google domain
+    if 'deepmind.com' in domains:
+        domains.update('google.com')
 
     return {
         'id': profile.id,
