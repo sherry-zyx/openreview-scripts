@@ -160,7 +160,7 @@ def _create_edge_invitation(edge_id, match_group, edited_by_assigned_ac=False):
     return invitation
 
 
-def build_conflicts(match_group, submissions):
+def build_conflicts(match_group, submissions, author_profiles):
     edges=[]
 
     invitation=_create_edge_invitation(conference.get_invitation_id('Conflict',prefix=match_group.id), match_group)
@@ -175,7 +175,6 @@ def build_conflicts(match_group, submissions):
         author_relations = set()
         author_publications = set()
 
-        author_profiles=openreview.matching._get_profiles(client, submission.details['original']['content']['authorids'])
         for author in author_profiles:
             author_info = get_profile_info(author)
             author_domains.update(author_info['domains'])
@@ -231,10 +230,14 @@ if __name__ == '__main__':
     sac_group=client.get_group(conference.get_senior_area_chairs_id())
     ac_group=client.get_group(conference.get_area_chairs_id())
     rev_group=client.get_group(conference.get_reviewers_id())
+    
+    author_profiles={}
+    for submission in submissions:       
+        author_profiles[submission.id]=openreview.matching._get_profiles(client, submission.details['original']['content']['authorids'])
 
     for match_group in [sac_group, ac_group, rev_group]:
         is_area_chair = conference.get_area_chairs_id() == match_group.id
         is_senior_area_chair = conference.get_senior_area_chairs_id() == match_group.id
         should_read_by_area_chair = conference.get_reviewers_id() == match_group.id
-        post_edges=build_conflicts(match_group, submissions)
+        post_edges=build_conflicts(match_group, submissions, author_profiles)
 
